@@ -1,0 +1,16 @@
+{
+  "name": "Keropoi.ScanKit.Editor",
+  "references": [
+    "lilToon.Editor",
+    "nadena.dev.modular-avatar.core",
+    "nadena.dev.ndmf.runtime",
+    "nadena.dev.ndmf",
+    "nadena.dev.ndmf.vrchat",
+    "VRC.SDK3A",
+    "VRC.SDKBase"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": true
+}

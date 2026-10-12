@@ -1,0 +1,21 @@
+{
+  "name": "com.keropoi.avatar-transformation",
+  "displayName": "Avatar Transformation Scan Kit",
+  "version": "0.1.0-preview.1",
+  "unity": "2022.3",
+  "description": "Editor-only generator for a prepared Plum avatar: complementary outfit scan, halo motion, wing dissolve and optional audio.",
+  "author": { "name": "Keropoi" },
+  "license": "UNLICENSED",
+  "vpmDependencies": {
+    "com.vrchat.avatars": "3.10.1",
+    "nadena.dev.modular-avatar": "1.16.2",
+    "nadena.dev.ndmf": "1.11.0",
+    "com.vrcfury.vrcfury": "1.1336.0",
+    "jp.lilxyzw.liltoon": "2.3.2",
+    "com.poiyomi.toon": "10.0.24",
+    "com.poiyomi.thryeditor": "2.74.3",
+    "com.chocopoi.vrc.dressingtools": "2.6.0",
+    "com.chocopoi.vrc.dressingframework": "2.1.1",
+    "com.chocopoi.vrc.avatarlib": "1.1.1"
+  }
+}
