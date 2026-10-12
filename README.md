@@ -1,44 +1,46 @@
 # Avatar Transformation Scan Kit
 
-面向已准备好的 Plum VRChat Avatar 的变身工具包，当前为 `0.1.0-preview.1`。
+English | [简体中文](README.zh-CN.md)
 
-初步目标：**在已验证的素材组合、插件版本及准备条件下，用户一句话即可让 Agent 完成安装和本地验证。** 本版本提供生成器、Plum 预设、安装/更新/卸载/检查入口及 Agent 文档；不承担自动购买、任意模型自动穿衣或游戏上传。
+A transformation toolkit for prepared Plum VRChat avatars. Current package version: `0.1.0-preview.1`.
 
-## 效果
+The initial goal is **one user prompt for an Agent to install the effect and perform local validation, given the verified asset combination, plugin versions, and preparation steps.** This preview includes a generator, a Plum preset, install/update/uninstall/validation entry points, and Agent instructions. Purchasing assets, fitting arbitrary outfits, and uploading to VRChat are outside its scope.
 
-- 光环上升 1.2 秒；上升结束后放大 1 秒，两段均先快后慢。
-- 光环用 1.1 秒下降扫描，先慢、再快、再慢；A/B 服装互补裁切。
-- B 翅膀在扫描中逐渐显现，待机恢复原材质；大剑保持 B 专属及原有开关。
-- 可选音频在正向变身前播放 0.7 秒前奏，音量 0.65；反向不播放，有独立音效开关。未配置音频时仅安装无声变身。
-- 身体防穿模 BlendShape 与换装协调；光环商品的调节菜单移除，默认粒子保留。
-- 使用 VRCFury 的 Write Defaults Auto 修复；不添加人体动作或镜头动画。
+## Effects
 
-## 准备与安装
+- The halo rises for 1.2 seconds, then expands for 1 second. Both stages start fast and ease out.
+- The descending scan lasts 1.1 seconds, with a pronounced slow–fast–slow curve and complementary clipping of outfits A and B.
+- Outfit B's wings appear progressively during the scan and return to their original materials at rest. The great sword remains exclusive to B and retains its original toggle.
+- Optional audio starts 0.7 seconds before the forward visual transformation, at volume 0.65. It has a separate toggle and does not play on the reverse transformation. Without an audio configuration, installation produces a silent transformation.
+- Body anti-clipping BlendShapes are coordinated with the outfit change. The halo product's adjustment menu is removed while its default particles are retained.
+- Uses VRCFury's Write Defaults Auto fix. No body poses or camera animations are added.
 
-1. 对照 [Booth 商品清单草稿](Documentation~/BOOTH_ASSETS.md)，自行购买并导入素材。商品文件、原素材派生材质/网格/控制器、音频均不在仓库内。
-2. 按 [准备条件与版本](Documentation~/COMPATIBILITY.md) 配好 Windows Avatar 工程：已穿好衣服、绑定好骨骼、放好光环和翅膀，按预设命名分组。保存场景。
-3. 下载此仓库的包，将其内容置于 `Packages/com.keropoi.avatar-transformation/`。先安装依赖，再放入本包。不要在 Assets 和 Packages 重复安装。
-4. Unity MCP 连接正常后，向 Agent 发送：
+## Preparation and installation
 
-> 请先读取 Packages/com.keropoi.avatar-transformation/Documentation~/AGENT_SETUP.md。素材与插件已按 Plum 预设准备好，请为当前选中的 Avatar 安装变身效果并完成本地验证；如有缺失请准确报告。
+1. Purchase and import your own assets using the [draft Booth asset list](Documentation~/BOOTH_ASSETS.md). Product files, derived materials/meshes/controllers, and audio are not included in this repository.
+2. Follow the [preparation and version requirements](Documentation~/COMPATIBILITY.md) for a Windows avatar project: fit and rig the outfits, position the halo and wings, and name the groups according to the preset. Save the scene.
+3. Download this repository's package and place its contents in `Packages/com.keropoi.avatar-transformation/`. Install dependencies first. Do not install duplicate copies under both Assets and Packages.
+4. With Unity MCP connected, send your Agent this prompt:
 
-Agent 会检查前置条件、生成本地配置和角色副本、执行安装与 SDK 预处理检查，并汇报验证范围。没有 Agent 时也可使用 `Tools/ScanKit` 菜单。
+> First read Packages/com.keropoi.avatar-transformation/Documentation~/AGENT_SETUP.md. The assets and plugins are prepared according to the Plum preset. Install the transformation effect on the currently selected avatar and complete local validation; report any missing prerequisites precisely.
 
-## 更新与卸载
+The Agent checks prerequisites, creates a local recipe and avatar copy, runs installation and SDK preprocessing checks, and reports the scope of validation. The `Tools/ScanKit` menu also supports manual operation.
 
-安装在新建角色副本上进行；成功后原角色仅变为不激活。第一版每个工程只管理一套安装。
+## Updating and uninstalling
 
-修改**原角色**的材质、准备状态或本地 Recipe，再执行 `3 Update from Source Avatar`；系统先生成并检查新副本，再替换旧副本。直接修改已安装副本的改动不会在更新时保留。历史生成目录暂留作追溯，卸载时一并清理。
+Installation creates an avatar copy. On success, the original avatar is deactivated. This preview manages one installation per project.
 
-执行 `5 Uninstall` 会删除受本包管理的副本与生成目录，恢复原角色之前的激活状态；保留购买的素材和 Recipe。安装、更新和卸载后保存场景。
+Edit the **source avatar's** materials or preparation, or the local Recipe, then run `3 Update from Source Avatar`. The system generates and checks a new copy before replacing the previous one. Edits made directly to the installed copy are not preserved during updates. Previous output directories are retained for traceability until uninstall.
 
-## 文档与当前边界
+`5 Uninstall` removes the kit-managed copy and generated directories, and restores the source avatar's previous active state. Purchased assets and the Recipe are retained. Save the scene after installing, updating, or uninstalling.
 
-- [Agent 操作流程](Documentation~/AGENT_SETUP.md)
-- [Booth 商品清单（请仓库作者补全）](Documentation~/BOOTH_ASSETS.md)
-- [版本、准备条件与兼容处理](Documentation~/COMPATIBILITY.md)
-- [配置、实现与验证范围](Documentation~/ARCHITECTURE.md)
-- [故障排查](Documentation~/TROUBLESHOOTING.md)
-- [验证记录](Documentation~/VALIDATION.md)
+## Documentation and current limits
 
-本地验证不等于上传后游戏验证。不同商品版本、体型、shader 或衣装结构暂不属于已验证支持范围。仓库仅公开代码供查看，**目前未授予开源许可证**，详见 [LICENSE](LICENSE)。
+- [Agent installation workflow](Documentation~/AGENT_SETUP.md)
+- [Booth asset list — author details pending](Documentation~/BOOTH_ASSETS.md)
+- [Versions, preparation, and compatibility](Documentation~/COMPATIBILITY.md)
+- [Configuration, implementation, and validation scope](Documentation~/ARCHITECTURE.md)
+- [Troubleshooting](Documentation~/TROUBLESHOOTING.md)
+- [Validation record](Documentation~/VALIDATION.md)
+
+Local validation is not verification in VRChat after upload. Other product versions, body shapes, shaders, and outfit structures are outside the verified support scope. The code is public for inspection, but **no open-source license has been granted**. See [LICENSE](LICENSE).

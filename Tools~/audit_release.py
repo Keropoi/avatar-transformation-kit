@@ -7,7 +7,7 @@ import zipfile
 import hashlib
 
 ROOT = Path(__file__).resolve().parents[1]
-ROOT_FILES = {'README.md', 'AGENTS.md', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'package.json', '.gitignore', '.gitattributes', 'CHANGELOG.md'}
+ROOT_FILES = {'README.md', 'README.zh-CN.md', 'AGENTS.md', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'package.json', '.gitignore', '.gitattributes', 'CHANGELOG.md'}
 DIRS = {'Editor', 'Presets', 'Documentation~', 'Tools~'}
 EXTS = {'.cs', '.asmdef', '.json', '.md', '.py', '.meta'}
 

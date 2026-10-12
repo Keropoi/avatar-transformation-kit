@@ -1,35 +1,37 @@
-# 0.1.0-preview.1 验证记录
+# Validation record: 0.1.0-preview.1
 
-日期：2026-10-12。环境版本见 [COMPATIBILITY.md](COMPATIBILITY.md)。
+English | [简体中文](VALIDATION.zh-CN.md)
 
-## 已执行
+Date: 2026-10-12. See [COMPATIBILITY.md](COMPATIBILITY.md) for environment versions.
 
-| 项目 | 结果 |
+## Checks performed
+
+| Check | Result |
 | --- | --- |
-| 包在 Unity 中编译并载入独立 Editor 程序集 | 通过 |
-| 从已准备的源角色安装到独立副本，原角色保留 | 通过；31 个衣装扫描渲染器 |
-| 更新替换旧副本，不留下两套激活角色 | 通过 |
-| 无效时序配置被拒绝，已有安装保留 | 通过 |
-| 卸载删除登记副本/生成目录，恢复原角色并保留 Recipe | 通过；有声与无声安装均测试 |
-| 正反曲线对应、1.1 秒下扫的强慢—快—慢曲线 | 通过 |
-| 有声分支前奏 0.7 秒，音量 0.65，反向不触发 | 状态机和曲线检查通过；未进行听感判断 |
-| 未提供音频的配置 | 安装与本地预处理通过，无音频源/音效参数 |
-| DressingFramework 适配 + SDK 注册回调顺序模拟 | 有声与无声配置均通过 |
-| 构建后的翼扫描曲线 | 通过；两个翼渲染器 × 两段变身 = 4 条扫描高度曲线 |
-| 所有换装材质引用、shader 错误检查 | 通过；临时材质未作为动画引用遗留 |
-| 本地 Prefab 保存后重新加载检查 FX 材质引用 | 通过 |
-| 实际构建后 FX 控制器手动推进 A→B→A | 通过；衣装与翼显隐复位 |
-| 固定全身视角检查起始、下扫中点及 B 待机 | 已查看本地静态采样；扫描衣装切换及白色翼材质正常，无紫色错误材质 |
-| 发布文件白名单 | 通过；仅源码、纯绑定/数字预设、文档和自身 meta |
+| Package compiles in Unity and loads its separate Editor assembly | Passed |
+| Installation creates a separate copy of a prepared source avatar and preserves the source | Passed; 31 outfit scan renderers |
+| Update replaces the old copy without leaving two active avatars | Passed |
+| Invalid timing configuration is rejected while preserving the existing installation | Passed |
+| Uninstall removes registered copies/output directories, restores the source, and retains the Recipe | Passed with both audio and silent installations |
+| Corresponding forward/reverse curves and the pronounced slow–fast–slow 1.1-second descending scan | Passed |
+| Audio branch has a 0.7-second prelude, volume 0.65, and no reverse trigger | State-machine and curve checks passed; no listening assessment performed |
+| Configuration with no audio supplied | Installation and local preprocessing passed; no AudioSource or sound parameter |
+| DressingFramework adapter and simulation of SDK-registered callback order | Passed with both audio and silent configurations |
+| Wing scan curves after preprocessing | Passed; two wing renderers × two transformation directions = four scan-height curves |
+| All outfit material references and shader error checks | Passed; no transient materials left as animation references |
+| FX material references after saving and reloading a local Prefab | Passed |
+| Manually advancing the actual processed FX controller through A→B→A | Passed; outfit and wing visibility reset |
+| Fixed full-body view at the start, scan midpoint, and B idle | Local static samples inspected; outfit scanning and white wing materials appeared correct, with no magenta error materials |
+| Release file allowlist | Passed; only source, numeric/path-binding presets, documentation, and their own metadata |
 
-FX 测试在临时副本使用实际 FX 控制器推进时间；为独立检查材质而禁用了该临时副本的人形 Avatar 绑定。没有模拟全身追踪或游戏网络同步。单独调用 AnimationClip.SampleAnimation 会重置人形姿态或不足以还原材质动画，不能把这种直接采样当作运行结果。
+FX testing advanced the actual FX controller on a temporary copy. That copy's humanoid Avatar binding was disabled to isolate material checks. Full-body tracking and game network synchronization were not simulated. Calling AnimationClip.SampleAnimation alone can reset the humanoid pose or fail to reproduce material animation; direct sampling is not proof of runtime behavior.
 
-## 范围限制
+## Limits
 
-- 测试源来自作者已穿戴完成的工程副本，在测试副本移除了旧变身模块并恢复原材质/光环控制器；不是从空工程重新购买下载、逐项导入后的独立复现。
-- 本轮未重新进入 Gesture Manager 完成表情菜单/大剑交互的全流程验收，也未重新上传 VRChat。现有实现的兼容处理已移植，但本包版本仍需这些验收。
-- 本地验证入口模拟预处理，保存并重新加载检查 Prefab；没有生成、重新加载 `.vrca` 或上传。
-- Booth 商品版本和官方链接尚待作者补齐。因此“一句话安装”的承诺限定于文档中已经准备完毕的组合，尚不等于任意新用户/任意资产环境都能无人工准备复现。
-- 动作中的极端穿模、F B T 姿势、粒子动态、运行时空间音频听感及其他 shader/商品版本未列为已验证。
+- The test source came from a copy of the author's already dressed project. The legacy transformation module was removed and original materials/halo controller restored on the test copy. This was not an independent reproduction from an empty project with freshly downloaded and imported products.
+- This validation round did not repeat the complete Gesture Manager acceptance flow for expression menus and sword interactions, or upload the package-generated avatar to VRChat. Compatibility handling from the existing implementation was migrated, but this package version still needs those checks.
+- The local validation entry point simulates preprocessing and saves/reloads a Prefab for checks. It does not generate or reload a `.vrca`, or upload anything.
+- Booth product versions and official links still need to be completed by the author. The one-prompt installation goal applies to the already prepared combination described in the documentation, not to arbitrary new users or asset environments without manual preparation.
+- Extreme-pose clipping, full-body tracking poses, particle dynamics, perceived runtime spatial audio, and other shader/product versions are not verified.
 
-所有测试截图、场景和生成资产保存在本地，未随仓库发布。
+All test screenshots, scenes, and generated assets remain local and are not published with the repository.

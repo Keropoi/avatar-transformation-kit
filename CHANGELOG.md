@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Made English the default README and documentation language.
+- Retained Simplified Chinese editions with reciprocal language links.
+- Documentation-only update; transformation behavior and the tested package baseline are unchanged.
+
 ## 0.1.0-preview.1
 
 - Extracted configurable Editor generator from the author's working transformation setup.

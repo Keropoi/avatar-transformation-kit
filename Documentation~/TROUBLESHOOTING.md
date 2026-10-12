@@ -1,17 +1,19 @@
-# 故障排查
+# Troubleshooting
 
-| 现象 | 检查与处理 |
+English | [简体中文](TROUBLESHOOTING.zh-CN.md)
+
+| Symptom | Checks and action |
 | --- | --- |
-| 编译报错 / 找不到程序集 | 先按版本表安装依赖；不要把工程生成目录当作包；检查是否重复安装。 |
-| Preflight 拒绝版本 | 使用记录版本，或在单独测试工程验证新版本；不要静默关闭检查并声称已支持。 |
-| 已存在 Transformation Scan | 本包不自动迁移旧实现。保留原工程，准备无变身的已穿衣源角色。 |
-| Gesture Manager 无 Avatar / Play 模式角色消失 | 查第一条 SDK/DressingTools 错误，确认 Play 生命周期准备已安装，源对象与副本没有同时参与构建。不要靠重新添加 Descriptor 掩盖构建失败。 |
-| 扫描中翅膀变紫、待机正常 | 检查生成翼材质是否为持久资产、构建后 PPtr 是否丢失、shader 是否有编译错误；执行本地验证及 shader 兼容检查。 |
-| 身体缺失 | 检查 Body_base 四个预设形态键与 MA Shape Changer；不要全局清空体型形态键。 |
-| 新材质没有进入扫描 | 修改原角色的原材质，再执行 Update。不要只编辑生成的扫描材质。 |
-| 音量修改无效 | 修改 recipe.settings.audioVolume 再 Update；音量也写入了动画，单独改 AudioSource 会被覆盖。 |
-| 没有声音 | audioPath 为空即无声版本；检查本地 AudioClip、KAT/Sound、前奏状态，反向本来不触发。 |
-| 表情无法复位 | 检查 VRCFury Write Defaults Auto 功能和构建错误；不要把整个 Avatar 所有层直接批量改为 WD Off。 |
-| 卸载找不到角色 | 打开 Registry 记录的安装场景，避免手动移动/删掉登记副本。不得因此删除原 Avatar 或整个 Assets。 |
+| Compilation errors / missing assemblies | Install dependencies from the version table first. Do not treat a generated project directory as the package. Check for duplicate installations. |
+| Preflight rejects versions | Use the recorded versions, or validate new versions in a separate test project. Do not silently disable checks and claim support. |
+| Transformation Scan already exists | Automatic migration of the legacy implementation is not supported. Preserve the original project and prepare a dressed source avatar without the transformation module. |
+| Gesture Manager finds no avatar / avatar disappears in Play mode | Inspect the first SDK/DressingTools error. Confirm that Play lifecycle preparation is installed and the source and copy are not both participating in the build. Adding another Descriptor does not resolve a build failure. |
+| Wings turn magenta during scanning but look normal at rest | Check that generated wing materials are persistent assets, that their PPtr references survive preprocessing, and that shaders compile. Run local validation and the shader compatibility checks. |
+| Missing body regions | Check the four preset Body_base BlendShapes and MA Shape Changer. Do not clear all body-shape BlendShapes globally. |
+| New materials are absent from the scan | Change the source avatar's original materials, then run Update. Editing only generated scan materials is insufficient. |
+| Volume changes have no effect | Change recipe.settings.audioVolume and run Update. Volume is also animated, so an AudioSource-only edit will be overwritten. |
+| No sound | An empty audioPath produces a silent version. Check the local AudioClip, KAT/Sound, and prelude state. Reverse transformations intentionally do not trigger audio. |
+| Expressions do not reset | Check VRCFury's Write Defaults Auto feature and build errors. Do not indiscriminately switch every layer on the avatar to WD Off. |
+| Uninstall cannot find the avatar | Open the installation scene recorded in the Registry. Avoid manually moving or deleting registered copies. Do not delete the source avatar or the entire Assets directory. |
 
-遇到失败保留首条 Console 异常、版本和本地验证报告供排查，分享前移除个人路径及商品二进制文件。
+When a check fails, retain the first Console exception, version information, and local validation report for diagnosis. Remove personal paths and product binaries before sharing them.
