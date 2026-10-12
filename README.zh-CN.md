@@ -2,45 +2,67 @@
 
 [English](README.md) | 简体中文
 
-面向已准备好的 Plum VRChat Avatar 的变身工具包，当前为 `0.1.0-preview.1`。
+为已准备好的 VRChat Avatar 生成光环扫描及 A/B 互补裁切换装的 Editor 工具包，当前预览版 `0.2.0-preview.1`。
 
-初步目标：**在已验证的素材组合、插件版本及准备条件下，用户一句话即可让 Agent 完成安装和本地验证。** 本版本提供生成器、Plum 预设、安装/更新/卸载/检查入口及 Agent 文档；不承担自动购买、任意模型自动穿衣或游戏上传。
+**用户自行选择并准备 A/B 服装，工具包提供绑定工具和动画生成代码。** 初步目标是在文档中的准备条件满足后，用户一句话即可让 Agent 安装并完成本地验证。服装穿戴、任意 shader 转换及上传 VRChat 不属于安装流程。
 
-## 效果
+## 核心效果
 
-- 光环上升 1.2 秒；上升结束后放大 1 秒，两段均先快后慢。
-- 光环用 1.1 秒下降扫描，先慢、再快、再慢；A/B 服装互补裁切。
-- B 翅膀在扫描中逐渐显现，待机恢复原材质；大剑保持 B 专属及原有开关。
-- 可选音频在正向变身前播放 0.7 秒前奏，音量 0.65；反向不播放，有独立音效开关。未配置音频时仅安装无声变身。
-- 身体防穿模 BlendShape 与换装协调；光环商品的调节菜单移除，默认粒子保留。
-- 使用 VRCFury 的 Write Defaults Auto 修复；不添加人体动作或镜头动画。
+- 光环上升 1.2 秒，随后放大 1 秒，两段均先快后慢。
+- 下扫 1.1 秒，明显先慢、再快、再慢；A 在扫描线下方消失，B 在同一扫描线上方出现。
+- 待机恢复服装原材质，保留源角色，支持更新和范围受控的卸载。
+- 无固定服装命名要求，不强制 Plum 身体、大剑或霓虹翅膀。核心扫描材质必须支持 lilToon 的平面溶解。
+- 身体防穿模遮罩和正向音效是可选本地配置。音效默认提前 0.7 秒、音量 0.65；仅配置 AudioClip 后生成独立音效开关。
+- 在安装副本使用 VRCFury Write Defaults Auto。不生成举手、姿势或镜头动画。
 
-## 准备与安装
+## 外部光环：用户自行购买导入
 
-1. 对照 [Booth 商品清单草稿](Documentation~/BOOTH_ASSETS.zh-CN.md)，自行购买并导入素材。商品文件、原素材派生材质/网格/控制器、音频均不在仓库内。
-2. 按 [准备条件与版本](Documentation~/COMPATIBILITY.zh-CN.md) 配好 Windows Avatar 工程：已穿好衣服、绑定好骨骼、放好光环和翅膀，按预设命名分组。保存场景。
-3. 下载此仓库的包，将其内容置于 `Packages/com.keropoi.avatar-transformation/`。先安装依赖，再放入本包。不要在 Assets 和 Packages 重复安装。
-4. Unity MCP 连接正常后，向 Agent 发送：
+本版使用 **Angelring Halo / comet_shop** 商品适配。用户自行购买、导入并将光环放在 Avatar 下，指定原光环 FX 控制器。仓库不分发光环的网格、贴图、材质、动画、粒子或商品派生文件；相关生成操作只在用户自己的工程内执行。
 
-> 请先读取 Packages/com.keropoi.avatar-transformation/Documentation~/AGENT_SETUP.zh-CN.md。素材与插件已按 Plum 预设准备好，请为当前选中的 Avatar 安装变身效果并完成本地验证；如有缺失请准确报告。
+仓库作者计划取得商品原作者的创作授权，**目前仓库尚未记录授权完成**。本预览版不声明已经获得授权。官方商品链接及实测下载版本仍待作者补充，见 [商品清单](Documentation~/BOOTH_ASSETS.zh-CN.md)。
 
-Agent 会检查前置条件、生成本地配置和角色副本、执行安装与 SDK 预处理检查，并汇报验证范围。没有 Agent 时也可使用 `Tools/ScanKit` 菜单。
+## 通过 Agent 安装
+
+1. 按 [兼容与准备要求](Documentation~/COMPATIBILITY.zh-CN.md) 安装核心插件，提前穿戴并绑定两套服装，导入和摆好自己购买的光环，保存场景。
+2. 包内容放在 `Packages/com.keropoi.avatar-transformation/`，不要同时在 Assets 再安装一份。仅在使用可选适配时安装对应额外依赖。
+3. 选中准备好的源角色，连接 Unity MCP，将实际 A/B 对象名告诉 Agent：
+
+> 请先读取 Packages/com.keropoi.avatar-transformation/Documentation~/AGENT_SETUP.zh-CN.md。我的 Avatar 和已购买的 Angelring Halo 已准备好，A 服装是【对象名】，B 服装是【对象名】。请安装光环扫描变身效果并完成本地验证，准确报告缺少的条件和未测项。
+
+将括号内容替换为实际场景对象名。Agent 创建本地核心 Recipe，绑定对象，检查材质和身体遮罩，在副本上安装并汇报结果；不得猜测服装的 A/B 归属。
+
+手动安装使用 `Tools/ScanKit/Setup User Outfits`：指定源角色、Recipe、Hips、A/B 组、原光环、视觉子物体和原 FX，保存绑定，按需配置身体遮罩，检查扫描高度和大小，再执行 Preflight、安装和验证。
+
+## 核心工具 + 可选适配
+
+| 功能 | 核心默认 | 可选配置 |
+| --- | --- | --- |
+| A/B 服装 | 用户指定互不重叠的对象组，使用 lilToon | Plum 初版复现预设 |
+| 光环 | 外部购买的 Angelring Halo | 支持的商品适配，仓库不附带素材 |
+| 身体遮罩 | 空；不要求 Plum 专用形态键 | 显式身体路径和 A/B 数值；必须处理破坏性删除规则 |
+| 霓虹翅膀 | 不要求 | 作为普通兼容 B 组，或启用专门翅膀适配；两种方式不重复使用 |
+| DressingTools | 适配关闭 | 对已准备好的 DressingTools 服装启用，并安装记录的依赖 |
+| 非 lilToon 材质 | 拒绝 | Plum 复现可明确启用简化转换，不承诺任意 shader 兼容 |
+| 音效 | 未配置则无声 | 本地授权 AudioClip，正向播放及独立开关 |
+
+配置见 [可选适配](Documentation~/ADAPTERS.zh-CN.md)。[Plum 商品列表](Documentation~/PLUM_ADAPTER_ASSETS.zh-CN.md) 仅描述历史组合，不是核心版必购清单。
 
 ## 更新与卸载
 
-安装在新建角色副本上进行；成功后原角色仅变为不激活。第一版每个工程只管理一套安装。
+修改**源角色**或本地 Recipe，再执行 `Tools/ScanKit/3 Update from Source Avatar`。系统先生成并检查新副本，再替换旧副本；直接修改安装副本的内容不会在更新时保留。历史输出目录留到卸载时清理。
 
-修改**原角色**的材质、准备状态或本地 Recipe，再执行 `3 Update from Source Avatar`；系统先生成并检查新副本，再替换旧副本。直接修改已安装副本的改动不会在更新时保留。历史生成目录暂留作追溯，卸载时一并清理。
+`Tools/ScanKit/5 Uninstall` 删除登记副本和自有生成目录，恢复源角色之前的激活状态，保留购买素材和 Recipe。每次操作后保存场景。当前每个工程管理一套安装。
 
-执行 `5 Uninstall` 会删除受本包管理的副本与生成目录，恢复原角色之前的激活状态；保留购买的素材和 Recipe。安装、更新和卸载后保存场景。
-
-## 文档与当前边界
+## 文档与验证
 
 - [Agent 操作流程](Documentation~/AGENT_SETUP.zh-CN.md)
-- [Booth 商品清单（请仓库作者补全）](Documentation~/BOOTH_ASSETS.zh-CN.md)
-- [版本、准备条件与兼容处理](Documentation~/COMPATIBILITY.zh-CN.md)
-- [配置、实现与验证范围](Documentation~/ARCHITECTURE.zh-CN.md)
+- [光环与用户素材清单](Documentation~/BOOTH_ASSETS.zh-CN.md)
+- [准备与兼容](Documentation~/COMPATIBILITY.zh-CN.md)
+- [可选适配](Documentation~/ADAPTERS.zh-CN.md)
+- [实现说明](Documentation~/ARCHITECTURE.zh-CN.md)
 - [故障排查](Documentation~/TROUBLESHOOTING.zh-CN.md)
-- [验证记录](Documentation~/VALIDATION.zh-CN.md)
+- [0.2 验证记录和边界](Documentation~/VALIDATION.zh-CN.md)
 
-本地验证不等于上传后游戏验证。不同商品版本、体型、shader 或衣装结构暂不属于已验证支持范围。仓库仅公开代码供查看，**目前未授予开源许可证**，详见 [LICENSE](LICENSE)。
+代码已经解除原服装组合的强制要求，验证范围仍限于记录的本地测试组合和版本，不等于所有 Avatar、shader 和服装均兼容。本地预处理不等于 SDK 打包或游戏验收。
+
+代码公开供查看，**尚未授予开源许可证**，见 [LICENSE](LICENSE)。商品许可和今后的创作授权与代码授权分别说明。

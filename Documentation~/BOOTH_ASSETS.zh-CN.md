@@ -1,26 +1,22 @@
-# Booth 商品清单草稿
+# 核心素材准备清单
 
 [English](BOOTH_ASSETS.md) | 简体中文
 
-此表依据当前工程名称和用途起草，**不是已核对的商品购买清单**。名称可能是文件夹、Prefab 或用户自定义对象名。发布者需补全官方商品标题、作者/店铺、商品页、下载版本/日期；无法由工程唯一确定的条目保留“待补”。本仓库不附带任何商品文件。
+核心版由用户选择 Avatar 与服装。仓库不分发购买商品、音频或本地生成的商品派生文件。
 
-| 项目内标识 / 暂定名称 | 用途 | 预设绑定 | 商品链接 | 版本 / 作者核对 |
-| --- | --- | --- | --- | --- |
-| Plum 本体 | 角色、身体网格、骨骼及身体形态键 | 根 Descriptor；Armature/Hips；Body_base | 待作者补充 | 待补 |
-| Plum School Uniform | A 校服、袜子及包等 | Plum_SchoolUniform(A) | 待作者补充 | 待补 |
-| A 鞋与配件（来源待确认） | A 鞋、颈部等配件 | Shoes&ACC(A) | 待作者补充 | 待补 |
-| Noir / C.QuinStore（名称待核对） | B 上装、臂套、裙等 | Noir_Plum_BK(B) | 待作者补充 | 待补；当前臂套和裙使用 Noir_UV2_WH |
-| B 鞋（来源待确认） | B 鞋 | Shoes(B) | 待作者补充 | 待补 |
-| Great sword（来源待确认） | B 大剑及原有开关 | Great sword (B) | 待作者补充 | 待补；保留 Great_SwordOn 等原控制 |
-| Hosanna_Ccl（商品名待核对） | B 衣装组合的一部分 | Hosanna_Ccl(B) | 待作者补充 | 具体子网格用途待作者确认 |
-| Stocking（来源待确认） | B 长袜 | Stocking(B) | 待作者补充 | 网格名含 Lime&Chiffon&Chocolat，不足以唯一识别商品 |
-| Angelring Halo / comet_shop | 原光环、扫描环视觉、默认粒子和连续动画 | Angelring_Halo_White/Halo_Position | 待作者补充 | 控制器 FX_Angelring_Halo；版本待补 |
-| Neon Angel Set / harusamezakka | B 霓虹天使翅膀 | AngelNeonWing(B)；wing L / wing R | 待作者补充 | neon white 原材质；版本待补 |
-| 变身音效（来源待确认） | 可选正向变身音效 | 用户填写 recipe.settings.audioPath | 待作者补充 | 不随仓库发布；未填则无声 |
-| Plum Face Tracking / Triturbo（可选） | 当前角色已有的脸部追踪 | 已准备角色自身配置 | 待作者补充 | 不属于变身生成器提供的功能 |
+| 素材 | 是否必需 | 准备 / 用途 | 官方商品信息 |
+| --- | --- | --- | --- |
+| 用户自己的 VRChat Avatar | 是 | 根 Descriptor、有效骨骼，根节点旋转为零/缩放为一 | 用户选择，不要求购买固定模型 |
+| 用户的 A 服装 | 是 | 已穿戴/绑定，明确选择对象组，使用兼容 lilToon 材质 | 用户选择 |
+| 用户的 B 服装 | 是 | 同上，A/B 对象组互不重叠 | 用户选择 |
+| Angelring Halo / comet_shop（工程标识，官方名称待核对） | 当前光环适配必需 | 用户自行购买导入，放在 Avatar 下，指定视觉子物体及原 FX_Angelring_Halo 控制器 | **作者补充官方链接、正式名称、实测下载版本/日期及原作者创作授权记录** |
+| 用户的 AudioClip | 否 | 可选本地正向音效，audioPath 空值则无声 | 用户提供已获使用许可的音频 |
+| 翅膀、大剑、其他配件 | 否 | 用户选择的衣装组成部分或明确可选适配 | 核心版不要求特定配件商品 |
 
-插件版本另见 [COMPATIBILITY.zh-CN.md](COMPATIBILITY.zh-CN.md)，不要把软件依赖与必须购买的商品混为一项。
+仓库作者计划取得光环原作者的创作授权，目前尚无已经取得的记录。不得将本草稿作为原作者已同意的证据。用户按照商品适用条款自行获取素材；仓库不公开商品文件。
 
-建议每项补充：正式商品标题、店铺名、官方链接、实测版本或下载日期、是否必需、导入顺序、安装位置、是否修改材质/体型，以及授权说明链接。商品支持多个 Avatar 时写明本预设实测的 Plum 版本。
+光环默认绑定是 Angelring_Halo_White/Halo_Position 和 Assets/comet_shop/Angelring_Halo/Animation/FX_Angelring_Halo.controller，可明确指定其他实例名称。适配逻辑目前针对该商品的控制器/粒子结构，不承诺任意光环商品兼容。
 
-所有材质复制、扫描网格烘焙和原商品控制器裁剪均在使用者自己的 Unity 工程中完成。本地生成文件仍可能含商品内容，不应据此认为可自由再分发。
+[Plum 可选商品清单](PLUM_ADAPTER_ASSETS.zh-CN.md) 用于历史组合复现，其中校服、Noir、大剑、袜子、翅膀、脸追均**不是核心版必需商品**。插件要求见 [兼容说明](COMPATIBILITY.zh-CN.md)。
+
+扫描材质副本、光环网格派生文件、生成控制器和验证资源保存在用户本地工程，排除在 Git 和 Release 之外。

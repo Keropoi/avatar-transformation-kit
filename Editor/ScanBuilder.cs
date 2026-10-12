@@ -79,7 +79,7 @@ namespace Keropoi.ScanKit.Editor
             ScanAudioSetup.Configure(d, module.gameObject);
             ScanHaloDefaults.Configure(root);
             // Match the accessory visibility the author prepared in the scene; keep their existing menu toggles usable.
-            foreach (var settings in root.GetComponentsInChildren<ModularAvatarParameters>(true))
+            foreach (var settings in d.usePlumAdapter ? root.GetComponentsInChildren<ModularAvatarParameters>(true) : new ModularAvatarParameters[0])
             {
                 var serialized = new SerializedObject(settings);
                 var parameters = serialized.FindProperty("parameters");
@@ -120,6 +120,8 @@ namespace Keropoi.ScanKit.Editor
             }
             else
             {
+                if (!d.allowSimpleMaterialConversion)
+                    throw new InvalidOperationException("Core scan requires lilToon materials. Unsupported material: " + source.name);
                 // Use the original sword texture during the wipe, and restore its Poiyomi material at rest.
                 m = new Material(Shader.Find("Hidden/lilToonCutout"));
                 m.SetTexture("_MainTex", source.mainTexture);
@@ -255,7 +257,7 @@ namespace Keropoi.ScanKit.Editor
             pars.parameters = new List<ParameterConfig> { new ParameterConfig { nameOrPrefix = Parameter, syncType = ParameterSyncType.Bool, saved = true, defaultValue = 0, hasExplicitDefaultValue = true } };
             var menu = AssetDatabase.LoadAssetAtPath<VRCExpressionsMenu>(Folder + "/TransformationMenu.asset");
             if (!menu) { menu = ScriptableObject.CreateInstance<VRCExpressionsMenu>(); AssetDatabase.CreateAsset(menu, Folder + "/TransformationMenu.asset"); }
-            menu.controls = new List<VRCExpressionsMenu.Control> { new VRCExpressionsMenu.Control { name = "变身 / Outfit B", type = VRCExpressionsMenu.Control.ControlType.Toggle, parameter = new VRCExpressionsMenu.Control.Parameter { name = Parameter }, value = 1 } };
+            menu.controls = new List<VRCExpressionsMenu.Control> { new VRCExpressionsMenu.Control { name = "Transformation / Outfit B", type = VRCExpressionsMenu.Control.ControlType.Toggle, parameter = new VRCExpressionsMenu.Control.Parameter { name = Parameter }, value = 1 } };
             var installer = module.GetComponent<ModularAvatarMenuInstaller>() ?? module.AddComponent<ModularAvatarMenuInstaller>();
             installer.menuToAppend = menu;
             EditorUtility.SetDirty(controller); EditorUtility.SetDirty(menu); EditorUtility.SetDirty(module);

@@ -16,7 +16,9 @@ namespace Keropoi.ScanKit.Editor
         public static readonly Dictionary<string, string> TestedVersions = new Dictionary<string, string> {
             {"com.vrchat.avatars","3.10.1"}, {"com.vrchat.base","3.10.1"},
             {"nadena.dev.modular-avatar","1.16.2"}, {"nadena.dev.ndmf","1.11.0"},
-            {"com.vrcfury.vrcfury","1.1336.0"}, {"jp.lilxyzw.liltoon","2.3.2"},
+            {"com.vrcfury.vrcfury","1.1336.0"}, {"jp.lilxyzw.liltoon","2.3.2"}
+        };
+        public static readonly Dictionary<string, string> AdapterVersions = new Dictionary<string, string> {
             {"com.poiyomi.toon","10.0.24"}, {"com.poiyomi.thryeditor","2.74.3"},
             {"com.chocopoi.vrc.dressingtools","2.6.0"}, {"com.chocopoi.vrc.dressingframework","2.1.1"},
             {"com.chocopoi.vrc.avatarlib","1.1.1"}
@@ -29,14 +31,17 @@ namespace Keropoi.ScanKit.Editor
                 throw new InvalidOperationException("Select a scene-root VRCAvatarDescriptor.");
             if (avatar.scene != SceneManager.GetActiveScene() || string.IsNullOrEmpty(avatar.scene.path))
                 throw new InvalidOperationException("Use the active saved scene.");
-            if (!recipe || !recipe.settings) throw new InvalidOperationException("Create a Plum recipe first.");
+            if (!recipe || !recipe.settings) throw new InvalidOperationException("Create and configure a recipe first.");
             if (avatar.GetComponentsInChildren<Transform>(true).Any(t => t.name == "Transformation Scan" || t.name == ScanBuilder.Module))
                 throw new InvalidOperationException("Source already contains a transformation. Use an unmodified, dressed source avatar; legacy migration is not automatic.");
             if (recipe.requireTestedVersions)
             {
                 if (Application.unityVersion != "2022.3.22f1") throw new InvalidOperationException("Preset tested with Unity 2022.3.22f1 only.");
                 var packages = UnityEditor.PackageManager.PackageInfo.GetAllRegisteredPackages();
-                foreach (var pair in TestedVersions)
+                var versions = TestedVersions.AsEnumerable();
+                if (recipe.settings.usePlumAdapter) versions = versions.Concat(AdapterVersions);
+                else if (recipe.settings.useDressingToolsAdapter) versions = versions.Concat(AdapterVersions.Where(p => p.Key.StartsWith("com.chocopoi.", StringComparison.Ordinal)));
+                foreach (var pair in versions)
                 {
                     var package = packages.FirstOrDefault(p => p.name == pair.Key);
                     if (package == null || package.version != pair.Value) throw new InvalidOperationException("Version mismatch: " + pair.Key + " requires " + pair.Value);
@@ -44,23 +49,64 @@ namespace Keropoi.ScanKit.Editor
             }
             var d = recipe.settings; ScanMotion.Validate(d);
             if (avatar.transform.localScale != Vector3.one || Quaternion.Angle(avatar.transform.rotation, Quaternion.identity) > .01f)
-                throw new InvalidOperationException("Plum preset requires an unrotated, unit-scale avatar root.");
+                throw new InvalidOperationException("Scan requires an unrotated, unit-scale avatar root.");
             if (d.audioVolume < 0 || d.audioVolume > 1 || d.audioLeadSeconds <= 0) throw new InvalidOperationException("Invalid sound settings.");
             if (!string.IsNullOrEmpty(d.audioPath) && !AssetDatabase.LoadAssetAtPath<AudioClip>(d.audioPath)) throw new InvalidOperationException("Audio path is not an imported AudioClip.");
-            foreach (var path in d.groupsA.Concat(d.groupsB).Concat(new[] {d.hipsPath, d.haloPath + "/" + d.haloVisualPath, d.bodyPath}))
+            if (d.groupsA == null || d.groupsB == null || d.groupsA.Count == 0 || d.groupsB.Count == 0)
+                throw new InvalidOperationException("Specify at least one prepared outfit group for both A and B.");
+            var groups = d.groupsA.Concat(d.groupsB).ToArray();
+            foreach (var path in groups.Concat(new[] {d.hipsPath, d.haloPath, d.haloPath + "/" + d.haloVisualPath}))
+            {
+                if (string.IsNullOrWhiteSpace(path)) throw new InvalidOperationException("Empty binding. Configure the recipe for the selected avatar.");
                 if (!avatar.transform.Find(path)) throw new InvalidOperationException("Missing binding: " + path);
-            if (d.groupsA.Intersect(d.groupsB).Any()) throw new InvalidOperationException("A/B groups must be disjoint.");
-            if (d.groupsB.Any(g => !g.Contains("(B)"))) throw new InvalidOperationException("Preset B groups must retain (B) naming through third-party processing.");
+            }
+            if (groups.Distinct().Count() != groups.Length || groups.Any(a => groups.Any(b => a != b && b.StartsWith(a + "/", StringComparison.Ordinal))))
+                throw new InvalidOperationException("Outfit groups must be distinct and must not contain one another.");
+            if (groups.Any(g => d.hipsPath == g || d.hipsPath.StartsWith(g + "/", StringComparison.Ordinal) || d.haloPath == g || d.haloPath.StartsWith(g + "/", StringComparison.Ordinal)))
+                throw new InvalidOperationException("Outfit groups must not contain the avatar hips or source halo.");
             if (!AssetDatabase.LoadAssetAtPath<AnimatorController>(d.haloControllerPath)) throw new InvalidOperationException("Original halo FX controller missing.");
-            var wing = avatar.GetComponentsInChildren<Transform>(true).Where(t => t.name == d.wingName).ToArray();
-            if (wing.Length != 1 || wing[0].GetComponentsInChildren<SkinnedMeshRenderer>(true).Length != 2)
-                throw new InvalidOperationException("Preset requires one placed AngelNeonWing(B), with two skinned renderers.");
+            var halo = avatar.transform.Find(d.haloPath);
+            if (!halo.GetComponent<nadena.dev.modular_avatar.core.ModularAvatarMergeAnimator>())
+                throw new InvalidOperationException("Angelring Halo adapter requires the imported halo's MA Merge Animator.");
+            if (!avatar.transform.Find(d.haloPath + "/" + d.haloVisualPath).GetComponentsInChildren<Renderer>(true).Any(r => !(r is ParticleSystemRenderer)))
+                throw new InvalidOperationException("Halo visual has no mesh renderer.");
+            if (d.useWingAdapter)
+            {
+                if (string.IsNullOrWhiteSpace(d.wingName)) throw new InvalidOperationException("Optional wing adapter requires a wing name.");
+                var wing = avatar.GetComponentsInChildren<Transform>(true).Where(t => t.name == d.wingName).ToArray();
+                if (wing.Length != 1 || wing[0].GetComponentsInChildren<SkinnedMeshRenderer>(true).Length == 0)
+                    throw new InvalidOperationException("Optional wing adapter requires one placed wing object with skinned renderers.");
+                if (groups.Any(g => wing[0].IsChildOf(avatar.transform.Find(g))))
+                    throw new InvalidOperationException("Configure wings either as an ordinary B group or through the wing adapter, not both.");
+            }
+            if (d.bodyMasks == null) throw new InvalidOperationException("Body mask configuration must be a list, which may be empty.");
             foreach (var rule in d.bodyMasks)
             {
+                if (string.IsNullOrWhiteSpace(d.bodyPath) || rule.path != d.bodyPath)
+                    throw new InvalidOperationException("Body-mask rules must target the explicitly configured bodyPath.");
                 var t = avatar.transform.Find(rule.path); var renderer = t ? t.GetComponent<SkinnedMeshRenderer>() : null;
                 if (!renderer || !renderer.sharedMesh || renderer.sharedMesh.GetBlendShapeIndex(rule.shape) < 0)
                     throw new InvalidOperationException("Body mask binding missing: " + rule.path + "/" + rule.shape);
             }
+            foreach (var group in groups.Select(g => avatar.transform.Find(g)))
+            {
+                if (!group.GetComponentsInChildren<Renderer>(true).Any(r => r.enabled && (r is MeshRenderer || r is SkinnedMeshRenderer)))
+                    throw new InvalidOperationException("Outfit group has no enabled mesh renderer: " + group.name);
+                foreach (var changer in group.GetComponentsInChildren<nadena.dev.modular_avatar.core.ModularAvatarShapeChanger>(true))
+                    foreach (var shape in changer.Shapes)
+                    {
+                        var target = shape.Object.Get(changer);
+                        if (!target) continue;
+                        var path = AnimationUtility.CalculateTransformPath(target.transform, avatar.transform);
+                        if (shape.ChangeType == nadena.dev.modular_avatar.core.ShapeChangeType.Delete && !d.bodyMasks.Any(m => m.path == path && m.shape == shape.ShapeName))
+                            throw new InvalidOperationException("Explicit body-mask rule required for destructive outfit shape rule: " + path + "/" + shape.ShapeName);
+                    }
+            }
+            foreach (var renderer in KitBindings.OutfitRenderers(avatar, d))
+                foreach (var material in renderer.sharedMaterials)
+                    if (material && material.shader && !d.allowSimpleMaterialConversion &&
+                        (!material.shader.name.ToLowerInvariant().Contains("liltoon") || !material.HasProperty("_DissolveParams") || !material.HasProperty("_DissolvePos")))
+                        throw new InvalidOperationException("Core scan requires lilToon plane-dissolve materials: " + renderer.name + "/" + material.name);
             foreach (var r in avatar.GetComponentsInChildren<Renderer>(true).Where(r => !(r is ParticleSystemRenderer)))
                 if (r.sharedMaterials.Any(m => !m || !m.shader)) throw new InvalidOperationException("Missing material/shader: " + r.name);
             // Known optimizer issue: a commented include was treated as an active include.
@@ -133,15 +179,22 @@ namespace Keropoi.ScanKit.Editor
                 foreach (var clip in clips)
                 {
                     ValidateMaterialReferences(clip);
-                    if (AnimationUtility.GetCurveBindings(clip).Count(b => b.propertyName == "material._DissolveParams.z") != ScanBuilder.Data.renderers.Count + 2)
+                    int expectedWingRenderers = 0;
+                    if (ScanBuilder.Data.useWingAdapter)
+                    {
+                        var wing = copy.GetComponentsInChildren<Transform>(true).Single(t => t.name == ScanBuilder.Data.wingName);
+                        expectedWingRenderers = wing.GetComponentsInChildren<SkinnedMeshRenderer>(true).Length;
+                    }
+                    if (AnimationUtility.GetCurveBindings(clip).Count(b => b.propertyName == "material._DissolveParams.z") != ScanBuilder.Data.renderers.Count + expectedWingRenderers)
                         throw new InvalidOperationException("Built scan renderer count mismatch.");
                     foreach (var b in AnimationUtility.GetCurveBindings(clip).Where(b => b.propertyName == "material._DissolveParams.z"))
                     {
                         if (!copy.transform.Find(b.path)) throw new InvalidOperationException("Build changed an animation path: " + b.path);
-                        if (b.path.Contains(ScanBuilder.Data.wingName)) wingBindings++;
+                        if (ScanBuilder.Data.useWingAdapter && b.path.Split('/').Contains(ScanBuilder.Data.wingName)) wingBindings++;
+                        if (clip.name.EndsWith("KAT_A_to_B", StringComparison.Ordinal)) ValidateBuiltPlane(copy, clip, b, ScanBuilder.Data);
                     }
                 }
-                if (wingBindings < 4) throw new InvalidOperationException("Wing scan missing from built clips.");
+                if (ScanBuilder.Data.useWingAdapter && wingBindings == 0) throw new InvalidOperationException("Wing scan missing from built clips.");
                 // Exercise imported materials after serialization, catching the prior transient-material bug.
                 var prefabPath = ScanBuilder.Folder + "/LocalValidation.prefab";
                 var saved = PrefabUtility.SaveAsPrefabAsset(copy, prefabPath);
@@ -165,6 +218,23 @@ namespace Keropoi.ScanKit.Editor
                 throw;
             }
             finally { UnityEngine.Object.DestroyImmediate(copy); }
+        }
+
+        static void ValidateBuiltPlane(GameObject root, AnimationClip clip, EditorCurveBinding binding, ScanSetupData data)
+        {
+            var renderer = root.transform.Find(binding.path).GetComponent<Renderer>();
+            var skinned = renderer as SkinnedMeshRenderer;
+            var space = skinned && skinned.rootBone ? skinned.rootBone : renderer.transform;
+            var matrix = root.transform.worldToLocalMatrix * space.localToWorldMatrix;
+            var axis = new Vector3(matrix.m10, matrix.m11, matrix.m12);
+            var threshold = AnimationUtility.GetEditorCurve(clip, binding);
+            float sign = threshold.Evaluate(data.scanStart) > threshold.Evaluate(data.scanEnd) ? 1 : -1;
+            foreach (float time in new[] { data.scanStart, (data.scanStart + data.scanEnd) * .5f, data.scanEnd })
+            {
+                float physical = sign * threshold.Evaluate(time) * axis.magnitude + matrix.m13;
+                if (Mathf.Abs(physical - ScanMotion.HaloHeight(data, true).Evaluate(time)) > .0001f)
+                    throw new InvalidOperationException("Built plane mismatch: " + binding.path);
+            }
         }
 
         // SDK's dispatcher displays a blocking dialog on failure. Use its registered order,

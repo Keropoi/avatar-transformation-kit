@@ -26,6 +26,7 @@ namespace Keropoi.ScanKit.Editor
                 var group = root.transform.Find(path);
                 if (!group) throw new InvalidOperationException("Outfit group missing: " + path);
                 group.gameObject.SetActive(true);
+                if (!ScanBuilder.Data.useDressingToolsAdapter) continue;
                 // The prepared A/B selection is owned by the scan controller. Noir's legacy cabinet
                 // module renames its root and writes competing on/off clips; preserve rig and shape modules.
                 foreach (var component in group.GetComponents<Component>().Where(c => c && c.GetType().FullName == "Chocopoi.DressingTools.Components.OneConf.DTWearable"))
@@ -107,11 +108,15 @@ namespace Keropoi.ScanKit.Editor
                     var sk = r as SkinnedMeshRenderer;
                     if (sk && (!sk.rootBone || !sk.rootBone.IsChildOf(hips)))
                         throw new InvalidOperationException("Wearable is not bound to the avatar hips: " + path + ". Run DressingTools preparation before NDMF.");
+                    if (sk && sk.rootBone != hips) RebaseBounds(sk, hips);
                     var matrix = root.transform.worldToLocalMatrix * (sk && sk.rootBone ? sk.rootBone.localToWorldMatrix : r.localToWorldMatrix);
                     var axis = new Vector3(matrix.m10, matrix.m11, matrix.m12);
-                    // MA Bone Proxy accessories can live under Armature/.../Chest rather than
-                    // directly under the avatar; find their B group anywhere in the path.
-                    bool outfitB = d.groupsB.Any(g => path == g || path.StartsWith(g + "/", StringComparison.Ordinal)) || path.Split('/').Contains(d.wingName);
+                    // Infer ownership from the authored forward threshold direction. This survives
+                    // MA reparenting without imposing product names or (B) suffixes on user objects.
+                    var forward = clips.First(c => ClipName(c) == "KAT_A_to_B");
+                    var thresholdCurve = AnimationUtility.GetEditorCurve(forward,
+                        EditorCurveBinding.FloatCurve(path, r.GetType(), "material._DissolveParams.z"));
+                    bool outfitB = thresholdCurve.Evaluate(d.scanStart) > thresholdCurve.Evaluate(d.scanEnd);
                     float sign = outfitB ? 1 : -1;
                     float scale = axis.magnitude, offset = matrix.m13;
                     var direction = sign * axis.normalized;
@@ -128,8 +133,13 @@ namespace Keropoi.ScanKit.Editor
                     count++;
                 }
             }
-            foreach (var path in d.groupsA) root.transform.Find(path).gameObject.SetActive(true);
-            foreach (var path in d.groupsB) root.transform.Find(path).gameObject.SetActive(false);
+            // Read processed activation paths; their source paths may have changed during binding.
+            var idle = clips.First(c => ClipName(c) == "KAT_Idle_A");
+            foreach (var binding in AnimationUtility.GetCurveBindings(idle).Where(b => b.type == typeof(GameObject) && b.propertyName == "m_IsActive"))
+            {
+                var target = root.transform.Find(binding.path);
+                if (target) target.gameObject.SetActive(AnimationUtility.GetEditorCurve(idle, binding).Evaluate(0) > .5f);
+            }
             Debug.Log("[ScanKit] Calibrated " + paths.Length + " renderer planes after avatar preprocessing.");
             return count;
         }
@@ -145,6 +155,18 @@ namespace Keropoi.ScanKit.Editor
                 var curve = AnimationUtility.GetObjectReferenceCurve(clip, binding); AnimationUtility.SetObjectReferenceCurve(clip, binding, null);
                 var target = binding; target.type = typeof(SkinnedMeshRenderer); AnimationUtility.SetObjectReferenceCurve(clip, target, curve);
             }
+        }
+        static void RebaseBounds(SkinnedMeshRenderer renderer, Transform hips)
+        {
+            var matrix = hips.worldToLocalMatrix * renderer.rootBone.localToWorldMatrix;
+            var bounds = renderer.localBounds;
+            var converted = new Bounds(matrix.MultiplyPoint3x4(bounds.center), Vector3.zero);
+            for (int x = -1; x <= 1; x += 2)
+                for (int y = -1; y <= 1; y += 2)
+                    for (int z = -1; z <= 1; z += 2)
+                        converted.Encapsulate(matrix.MultiplyPoint3x4(bounds.center + Vector3.Scale(bounds.extents, new Vector3(x,y,z))));
+            renderer.rootBone = hips;
+            renderer.localBounds = converted;
         }
         static void SetCurve(AnimationClip clip, string path, Type type, string property, float[] times, float[] values)
         {

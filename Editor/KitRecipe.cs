@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Keropoi.ScanKit.Editor
 {
     // Object references and generated materials stay in the consumer's project.
-    [CreateAssetMenu(menuName = "ScanKit/Plum recipe")]
+    [CreateAssetMenu(menuName = "ScanKit/Recipe")]
     public sealed class KitRecipe : ScriptableObject
     {
         public ScanSetupData settings;

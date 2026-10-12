@@ -68,7 +68,7 @@ namespace Keropoi.ScanKit.Editor
                 defaultValue = 1, saved = true, hasExplicitDefaultValue = true });
             var menu = module.GetComponent<ModularAvatarMenuInstaller>().menuToAppend;
             menu.controls.RemoveAll(c => c.parameter != null && c.parameter.name == Parameter);
-            menu.controls.Add(new VRCExpressionsMenu.Control { name = "变身音效 / Sound", type = VRCExpressionsMenu.Control.ControlType.Toggle,
+            menu.controls.Add(new VRCExpressionsMenu.Control { name = "Transformation Sound", type = VRCExpressionsMenu.Control.ControlType.Toggle,
                 parameter = new VRCExpressionsMenu.Control.Parameter { name = Parameter }, value = 1 });
             EditorUtility.SetDirty(source); EditorUtility.SetDirty(spatial); EditorUtility.SetDirty(controller);
             EditorUtility.SetDirty(pars); EditorUtility.SetDirty(menu);

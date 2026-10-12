@@ -13,24 +13,31 @@ namespace Keropoi.ScanKit.Editor
     {
         public const string LocalRoot = "Assets/ScanKitLocal";
         public const string RegistryPath = LocalRoot + "/Registry.asset";
-        public const string RecipePath = LocalRoot + "/PlumRecipe.asset";
+        public const string RecipePath = LocalRoot + "/CoreRecipe.asset";
+        public const string PlumRecipePath = LocalRoot + "/PlumRecipe.asset";
         static string staging;
         public static KitRegistry Registry => AssetDatabase.LoadAssetAtPath<KitRegistry>(RegistryPath);
         public static string WorkingFolder => staging ?? (Registry ? Registry.folder : LocalRoot + "/NotInstalled");
 
-        [MenuItem("Tools/ScanKit/1 Create Plum Recipe")]
-        public static void CreateRecipe()
+        [MenuItem("Tools/ScanKit/1 Create Core Recipe")]
+        public static void CreateRecipe() => CreateRecipeAt(RecipePath, false);
+
+        [MenuItem("Tools/ScanKit/6 Create Optional Plum Recipe")]
+        public static void CreatePlumRecipe() => CreateRecipeAt(PlumRecipePath, true);
+
+        static void CreateRecipeAt(string path, bool plum)
         {
             RequireEditMode();
-            if (AssetDatabase.LoadAssetAtPath<KitRecipe>(RecipePath)) { Selection.activeObject = AssetDatabase.LoadAssetAtPath<KitRecipe>(RecipePath); return; }
+            if (AssetDatabase.LoadAssetAtPath<KitRecipe>(path)) { Selection.activeObject = AssetDatabase.LoadAssetAtPath<KitRecipe>(path); return; }
             EnsureLocalRoot();
             var recipe = ScriptableObject.CreateInstance<KitRecipe>();
-            AssetDatabase.CreateAsset(recipe, RecipePath);
+            AssetDatabase.CreateAsset(recipe, path);
             recipe.settings = ScriptableObject.CreateInstance<ScanSetupData>();
-            recipe.settings.name = "Plum preset (local bindings)";
+            recipe.settings.name = plum ? "Plum adapter (local bindings)" : "Core recipe (user outfits)";
             AssetDatabase.AddObjectToAsset(recipe.settings, recipe);
-            var preset = AssetDatabase.FindAssets("plum-verified").Select(AssetDatabase.GUIDToAssetPath)
-                .Single(p => p.EndsWith("/Presets/plum-verified.json", StringComparison.Ordinal));
+            string presetName = plum ? "plum-verified" : "core";
+            var preset = AssetDatabase.FindAssets(presetName).Select(AssetDatabase.GUIDToAssetPath)
+                .Single(p => p.EndsWith("/Presets/" + presetName + ".json", StringComparison.Ordinal));
             JsonUtility.FromJsonOverwrite(File.ReadAllText(preset), recipe.settings);
             EditorUtility.SetDirty(recipe); EditorUtility.SetDirty(recipe.settings);
             AssetDatabase.SaveAssets(); Selection.activeObject = recipe;

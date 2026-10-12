@@ -16,7 +16,8 @@ namespace Keropoi.ScanKit.Editor
             foreach (var changer in root.GetComponentsInChildren<ModularAvatarShapeChanger>(true))
             {
                 string owner = AnimationUtility.CalculateTransformPath(changer.transform, root.transform);
-                var outfit = data.renderers.FirstOrDefault(e => e.path == owner);
+                // Shape Changers may live on a selected group/container, above its renderer.
+                var outfit = data.renderers.FirstOrDefault(e => e.path == owner || e.path.StartsWith(owner + "/", StringComparison.Ordinal));
                 // Preserve rules on optional, unused clothing and all unrelated shape adjustments.
                 if (outfit == null) continue;
                 var migrated = new List<ChangedShape>();

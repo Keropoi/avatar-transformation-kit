@@ -17,7 +17,7 @@ namespace Keropoi.ScanKit.Editor
 
         public bool OnPreprocessAvatar(GameObject root)
         {
-            if (!ScanBuilder.Data) return true;
+            if (!ScanBuilder.Data || !ScanBuilder.Data.useWingAdapter) return true;
             var wing = root.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == WingName);
             if (!wing) return true;
             var descriptor = root.GetComponent<VRCAvatarDescriptor>();

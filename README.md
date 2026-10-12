@@ -2,45 +2,67 @@
 
 English | [简体中文](README.zh-CN.md)
 
-A transformation toolkit for prepared Plum VRChat avatars. Current package version: `0.1.0-preview.1`.
+An Editor toolkit for a halo-driven, complementary A/B outfit transformation on prepared VRChat avatars. Current preview: `0.2.0-preview.1`.
 
-The initial goal is **one user prompt for an Agent to install the effect and perform local validation, given the verified asset combination, plugin versions, and preparation steps.** This preview includes a generator, a Plum preset, install/update/uninstall/validation entry points, and Agent instructions. Purchasing assets, fitting arbitrary outfits, and uploading to VRChat are outside its scope.
+**You choose and prepare outfits A and B. The kit supplies binding tools and animation generation.** The initial goal is one Agent prompt for installation and local validation when the documented prerequisites are met. Outfit fitting, arbitrary shader conversion, and VRChat upload are outside the installation workflow.
 
-## Effects
+## Core effect
 
-- The halo rises for 1.2 seconds, then expands for 1 second. Both stages start fast and ease out.
-- The descending scan lasts 1.1 seconds, with a pronounced slow–fast–slow curve and complementary clipping of outfits A and B.
-- Outfit B's wings appear progressively during the scan and return to their original materials at rest. The great sword remains exclusive to B and retains its original toggle.
-- Optional audio starts 0.7 seconds before the forward visual transformation, at volume 0.65. It has a separate toggle and does not play on the reverse transformation. Without an audio configuration, installation produces a silent transformation.
-- Body anti-clipping BlendShapes are coordinated with the outfit change. The halo product's adjustment menu is removed while its default particles are retained.
-- Uses VRCFury's Write Defaults Auto fix. No body poses or camera animations are added.
+- Halo rises for 1.2 seconds, then expands for 1 second; both stages start fast and ease out.
+- Descending scan lasts 1.1 seconds with a pronounced slow–fast–slow curve. A disappears below the same plane that reveals B above it.
+- The kit restores original outfit materials at rest, preserves the source avatar, and supports update and scoped uninstall.
+- No fixed outfit names, Plum body, sword, or neon wings are required. Core scan materials must support lilToon's plane dissolve.
+- Body anti-clipping masks and forward-only audio are optional local configuration. Audio defaults: 0.7-second lead, volume 0.65; a separate sound toggle is generated only when a clip is supplied.
+- Uses VRCFury Write Defaults Auto on the installed copy. No body poses or camera animations are generated.
 
-## Preparation and installation
+## External halo — purchased by each user
 
-1. Purchase and import your own assets using the [draft Booth asset list](Documentation~/BOOTH_ASSETS.md). Product files, derived materials/meshes/controllers, and audio are not included in this repository.
-2. Follow the [preparation and version requirements](Documentation~/COMPATIBILITY.md) for a Windows avatar project: fit and rig the outfits, position the halo and wings, and name the groups according to the preset. Save the scene.
-3. Download this repository's package and place its contents in `Packages/com.keropoi.avatar-transformation/`. Install dependencies first. Do not install duplicate copies under both Assets and Packages.
-4. With Unity MCP connected, send your Agent this prompt:
+This release uses the **Angelring Halo / comet_shop** integration. Each user purchases and imports the corresponding product, positions it under their avatar, and supplies the original halo FX controller. No halo meshes, textures, materials, animations, particles, or product-derived assets are distributed here. They are processed locally in the consuming Unity project.
 
-> First read Packages/com.keropoi.avatar-transformation/Documentation~/AGENT_SETUP.md. The assets and plugins are prepared according to the Plum preset. Install the transformation effect on the currently selected avatar and complete local validation; report any missing prerequisites precisely.
+The repository author plans to obtain the product creator's authorization. **That authorization has not yet been documented in this repository.** Do not interpret this preview as a claim that permission has already been granted. The official product URL and tested download version remain author-supplied details in the [asset list](Documentation~/BOOTH_ASSETS.md).
 
-The Agent checks prerequisites, creates a local recipe and avatar copy, runs installation and SDK preprocessing checks, and reports the scope of validation. The `Tools/ScanKit` menu also supports manual operation.
+## Install with an Agent
 
-## Updating and uninstalling
+1. Install the [core dependencies and prepare the avatar](Documentation~/COMPATIBILITY.md). Dress and rig both outfits before using the kit. Import and position your purchased halo. Save the scene.
+2. Place the package in `Packages/com.keropoi.avatar-transformation/`. Do not install a second copy under Assets. Optional adapter dependencies are needed only for the adapters you use.
+3. Select the prepared source avatar, connect Unity MCP, and give the Agent the actual names of your A/B groups:
 
-Installation creates an avatar copy. On success, the original avatar is deactivated. This preview manages one installation per project.
+> First read Packages/com.keropoi.avatar-transformation/Documentation~/AGENT_SETUP.md. My avatar and purchased Angelring Halo are prepared. Outfit A is [object names], and outfit B is [object names]. Install the halo scan transformation and complete local validation. Report missing prerequisites and untested items.
 
-Edit the **source avatar's** materials or preparation, or the local Recipe, then run `3 Update from Source Avatar`. The system generates and checks a new copy before replacing the previous one. Edits made directly to the installed copy are not preserved during updates. Previous output directories are retained for traceability until uninstall.
+Replace the bracketed text with scene object names. The Agent creates a local core recipe, binds your objects, checks materials and body-mask rules, installs on a copy, and reports validation results. It must not guess which garments belong to A or B.
 
-`5 Uninstall` removes the kit-managed copy and generated directories, and restores the source avatar's previous active state. Purchased assets and the Recipe are retained. Save the scene after installing, updating, or uninstalling.
+For manual installation, open `Tools/ScanKit/Setup User Outfits`. Assign source avatar, recipe, hips, A/B groups, source halo, visual child, and original halo FX. Save bindings, configure body masks if needed, check scan heights/size, run Preflight, then install and validate.
 
-## Documentation and current limits
+## Core + optional adapters
 
-- [Agent installation workflow](Documentation~/AGENT_SETUP.md)
-- [Booth asset list — author details pending](Documentation~/BOOTH_ASSETS.md)
-- [Versions, preparation, and compatibility](Documentation~/COMPATIBILITY.md)
-- [Configuration, implementation, and validation scope](Documentation~/ARCHITECTURE.md)
+| Feature | Core default | Optional configuration |
+| --- | --- | --- |
+| A/B outfits | User-supplied, non-overlapping groups; lilToon materials | Optional Plum reproduction preset |
+| Halo | External purchased Angelring Halo | This is the supported halo integration, not a bundled asset |
+| Body masks | Empty; no Plum-specific BlendShapes required | Explicit body path and A/B values; destructive deletion rules must be handled |
+| Neon wings | Not required | Ordinary supported B group, or the dedicated wing adapter; never both |
+| DressingTools | Adapter disabled | Enable for prepared DressingTools outfits; requires its recorded dependencies |
+| Non-lilToon materials | Rejected | Plum reproduction's explicitly enabled simplified conversion; not a general shader adapter |
+| Sound | Silent when no clip is supplied | Local authorized AudioClip with forward-only playback and independent toggle |
+
+See [ADAPTERS.md](Documentation~/ADAPTERS.md) for configuration. The [Plum asset list](Documentation~/PLUM_ADAPTER_ASSETS.md) describes the optional historical combination and is not a required shopping list for the core.
+
+## Update and uninstall
+
+Edit the **source avatar** or local Recipe, then run `Tools/ScanKit/3 Update from Source Avatar`. A replacement copy is generated and checked before switching. Edits made directly to the installed copy do not survive updates. Previous generated directories remain until uninstall.
+
+`Tools/ScanKit/5 Uninstall` removes registered copies and owned output directories, restores the source's prior active state, and retains imported products and recipes. Save the scene after every operation. This preview manages one installation per project.
+
+## Documentation and verification
+
+- [Agent workflow](Documentation~/AGENT_SETUP.md)
+- [Required halo and user-supplied assets](Documentation~/BOOTH_ASSETS.md)
+- [Preparation and compatibility](Documentation~/COMPATIBILITY.md)
+- [Optional adapters](Documentation~/ADAPTERS.md)
+- [Implementation](Documentation~/ARCHITECTURE.md)
 - [Troubleshooting](Documentation~/TROUBLESHOOTING.md)
-- [Validation record](Documentation~/VALIDATION.md)
+- [0.2 validation record and limits](Documentation~/VALIDATION.md)
 
-Local validation is not verification in VRChat after upload. Other product versions, body shapes, shaders, and outfit structures are outside the verified support scope. The code is public for inspection, but **no open-source license has been granted**. See [LICENSE](LICENSE).
+The code no longer requires the original outfit combination. Verification is still limited to the recorded local fixtures and versions; it does not establish compatibility with every avatar, shader, or outfit. Local preprocessing is not a VRChat build or in-game acceptance test.
+
+Public source preview; **no open-source license granted**. See [LICENSE](LICENSE). Product licenses and any future creator authorization are separate from the code's license.

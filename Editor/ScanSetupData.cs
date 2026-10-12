@@ -7,12 +7,16 @@ namespace Keropoi.ScanKit.Editor
     public sealed class ScanSetupData : ScriptableObject
     {
         public string avatarName;
-        public string hipsPath = "Armature/Hips";
+        public string hipsPath = "";
         public string haloPath = "Angelring_Halo_White";
         public string haloVisualPath = "Halo_Position";
         public string haloControllerPath = "Assets/comet_shop/Angelring_Halo/Animation/FX_Angelring_Halo.controller";
-        public string wingName = "AngelNeonWing(B)";
-        public string bodyPath = "Body_base";
+        public string wingName = "";
+        public string bodyPath = "";
+        public bool usePlumAdapter;
+        public bool useDressingToolsAdapter;
+        public bool useWingAdapter;
+        public bool allowSimpleMaterialConversion;
         public string audioPath;
         public float audioLeadSeconds = .7f;
         public float audioVolume = .65f;
